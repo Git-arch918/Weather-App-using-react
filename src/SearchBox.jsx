@@ -24,7 +24,8 @@ export default function SearchBox({ updateinfo }) {
       console.log(jsonResponse); // Helpful for debugging
 
       if (jsonResponse.cod !== 200) {
-        throw new Error("City not found");
+        console.error("API Error:", jsonResponse.message);
+        throw new Error(jsonResponse.message || "City not found");
       }
 
       const result = {
