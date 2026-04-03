@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Alert from '@mui/material/Alert';
+import SearchIcon from '@mui/icons-material/Search';
 import "./SearchBox.css";
 
 export default function SearchBox({ updateinfo }) {
   const [city, setCity] = useState("");
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Use HTTPS and a valid OpenWeatherMap API key
   const api_url = "https://api.openweathermap.org/data/2.5/weather";
   const api_key = import.meta.env.VITE_WEATHER_API_KEY;
-
 
   const getWeatherInfo = async () => {
     try {
@@ -52,6 +54,7 @@ export default function SearchBox({ updateinfo }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true);
 
     try {
       const info = await getWeatherInfo();
@@ -59,6 +62,8 @@ export default function SearchBox({ updateinfo }) {
       setError(false);
     } catch (err) {
       setError(true);
+    } finally {
+      setLoading(false);
     }
 
     setCity(""); // Clear the input after submit
@@ -69,17 +74,36 @@ export default function SearchBox({ updateinfo }) {
       <form onSubmit={handleSubmit}>
         <TextField
           id="city"
-          label="City Name"
+          label="🌍 Search City"
           variant="outlined"
           required
           value={city}
           onChange={handleChange}
+          placeholder="Enter city name..."
+          size="medium"
         />
-        <br /><br />
-        <Button variant="contained" type="submit">
-          Search
+        <Button 
+          variant="contained" 
+          type="submit"
+          disabled={loading}
+          startIcon={<SearchIcon />}
+          sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+            },
+            '&:disabled': {
+              background: 'rgba(102, 126, 234, 0.5)',
+            }
+          }}
+        >
+          {loading ? "Searching..." : "Search"}
         </Button>
-        {error && <p style={{ color: "red" }}>No such place exists</p>}
+        {error && (
+          <Alert severity="error" sx={{ width: '100%', marginTop: '1rem' }}>
+            City not found! Please try another city name.
+          </Alert>
+        )}
       </form>
     </div>
   );
